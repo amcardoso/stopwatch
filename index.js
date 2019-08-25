@@ -3,6 +3,7 @@
 const Storage = require('node-storage');
 const commander = require('commander');
 const date = require('date-and-time');
+const inquirer = require('inquirer');
 
 const store = new Storage('~/.stopwatch');
 const program = new commander.Command();
@@ -57,8 +58,10 @@ let agora = date.format(now, 'HH-mm-ss DD-MM-YYYY');
 Construtor de ação
 */
 
-function acao(nomeAcao, dataInicio, dataFim) {
-  this.nome = nomeAcao;
+function acao(categoria, projeto, acao, dataInicio, dataFim) {
+  this.categoria = categoria;
+  this.projeto = projeto;
+  this.acao = acao;
   this.dataInicio = agora;
   this.dataFim = '';
   this.duracao = '';
@@ -80,6 +83,7 @@ Verificador de dados
 */
 
 // Verifica se já existe uma Ação iniciada
+/*
 function verificarNome(nomeInput) {
   for (var i = 0; i < dataBase.length; i++) {
     if (dataBase[i].nome === nomeInput.toString()) {
@@ -87,7 +91,7 @@ function verificarNome(nomeInput) {
     }
   }
 }
-
+*/
 
 
 
@@ -113,12 +117,11 @@ function definirFim() {
 // Adiciona duração em segundos da ação
 function duracao(nomeInput) {
   for (var i = 0; i < dataBase.length; i++) {
-    if (dataBase[i].nome === nomeInput) {
+
       let fim = date.parse(dataBase[i].dataFim, 'HH-mm-ss DD-MM-YYYY')
       let inicio = date.parse(dataBase[i].dataInicio, 'HH-mm-ss DD-MM-YYYY')
       dataBase[i].duracao = date.subtract(fim, inicio).toSeconds();
 
-    }
   }
 
   return
@@ -144,34 +147,22 @@ program
   })
 
 program
-  .command('start <nomeAcao>')
+  .command('start <nomeCategoria> <nomeProjeto> <nomeAcao>')
   .description('Salva a data e hora de início')
-  .action(function (nomeAcao) {
+  .action(function (nomeCategoria, nomeProjeto, nomeAcao) {
 
-    if (verificarNome(nomeAcao)) {
-      console.log('Essa ação já foi iniciada');
-    } else {
-      new acao(nomeAcao)
+      new acao(nomeCategoria, nomeProjeto, nomeAcao)
       saveDataBase();
-    }
-
-
   })
 
 program
-  .command('stop <nomeAcao>')
+  .command('stop')
   .description('Salva a data e hora de fim')
   .action(function (nomeAcao) {
 
-    if (verificarNome(nomeAcao)) {
       definirFim();
       duracao(nomeAcao);
       saveDataBase();
-    } else {
-      console.log('Essa ação não existe');
-    }
-
-
 
   })
 
