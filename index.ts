@@ -1,145 +1,22 @@
 #!/usr/bin/env node
 
-import Storage = require('node-storage');
 import Commander = require('commander');
-import moment = require('moment');
+import { Database } from './models/Database';
+import { Acao } from './models/Acao';
 
-moment.locale('pt-br');
-const store = new Storage('~/.stopwatch');
 const program = new Commander.Command();
 program.version('0.0.1');
+
+const dataBase = new Database();
+
 let comandoEncontrado = false;
-
-
-
-
-/*
-Database e suas funções
-*/
-
-let dataBase = []
-
-function loadDataBase () {
-  dataBase = store.get('dataBase')
-}
-
-function saveDataBase () {
-  store.put('dataBase', dataBase)
-}
-
-loadDataBase(); // Carregando os dados
-
-
-
-
-
-
-
-
-
-
-/*
-Criando registros de tempo
-*/
-
-const now = new Date();
-let agora = moment(now).format('HH-mm-ss DD-MM-YYYY');
-
-
-
-
-
-
-
-
-
-
-/*
-Construtor de ação
-*/
-
-function acao(nomeAcao, dataInicio?, dataFim?) {
-  this.nome = nomeAcao;
-  this.dataInicio = agora;
-  this.dataFim = '';
-  this.duracao = '';
-
-
-  dataBase.push(this);
-}
-
-
-
-
-
-
-
-
-
-/*
-Verificador de dados
-*/
-
-// Verifica se já existe uma Ação iniciada
-function verificarNome(nomeInput) {
-  for (var i = 0; i < dataBase.length; i++) {
-    if (dataBase[i].nome === nomeInput.toString()) {
-      return true
-    }
-  }
-}
-
-
-
-
-
-
-
-
-
-/*
-Funções de Ação
-*/
-
-// Adiciona data de conclusão de uma ação
-function definirFim() {
-  for (var i = 0; i < dataBase.length; i++) {
-    if (dataBase[i].dataFim === '') {
-      dataBase[i].dataFim = agora
-
-    }
-  }
-}
-
-// Adiciona duração em segundos da ação
-function duracao(nomeInput) {
-  for (var i = 0; i < dataBase.length; i++) {
-    if (dataBase[i].nome === nomeInput) {
-      dataBase[i].duracao = moment(dataBase[i].dataFim - dataBase[i].dataInicio).format('S');
-    }
-  }
-
-  return;
-}
-
-
-
-
-
-
-
-
-
-/*
-Comandos do programa
-*/
 
 program
   .command('agora')
   .description('Um teste de execução')
   .action(function() {
     comandoEncontrado = true;
-    console.log(agora);
+    console.log(new Date());
   })
 
 program
@@ -147,31 +24,24 @@ program
   .description('Salva a data e hora de início')
   .action(function (nomeAcao) {
     comandoEncontrado = true;
-    if (verificarNome(nomeAcao)) {
-      console.log('Essa ação já foi iniciada');
+    if (dataBase.verificarNome(nomeAcao)) {
+      console.error('Essa ação já foi iniciada');
     } else {
-      new acao(nomeAcao)
-      saveDataBase();
+      const acao = new Acao(nomeAcao);
+      dataBase.addAcao(acao);
     }
-
-
-  })
+  });
 
 program
   .command('stop <nomeAcao>')
   .description('Salva a data e hora de fim')
   .action(function (nomeAcao) {
     comandoEncontrado = true;
-    if (verificarNome(nomeAcao)) {
-      definirFim();
-      duracao(nomeAcao);
-      saveDataBase();
+    if (dataBase.verificarNome(nomeAcao)) {
+      dataBase.endAcao(nomeAcao);
     } else {
-      console.log('Essa ação não existe');
+      console.error('Essa ação não existe');
     }
-
-
-
   })
 
 program
@@ -179,7 +49,7 @@ program
   .description('Mostra todos os itens do database')
   .action(function() {
     comandoEncontrado = true;
-    console.log(dataBase);
+    console.log(dataBase.dataBase);
   })
 
 program.parse(process.argv);
