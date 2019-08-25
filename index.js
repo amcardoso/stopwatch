@@ -4,6 +4,8 @@ const Storage = require('node-storage');
 const commander = require('commander');
 const date = require('date-and-time');
 const inquirer = require('inquirer');
+var AsciiTable = require('ascii-table');
+
 
 const store = new Storage('~/.stopwatch');
 const program = new commander.Command();
@@ -33,7 +35,11 @@ loadDataBase(); // Carregando os dados
 
 
 
+/*
+Criando tabela
+*/
 
+var table = new AsciiTable();
 
 
 
@@ -127,6 +133,22 @@ function duracao(nomeInput) {
   return
 }
 
+// Desenha uma tabela com os registros do dataBase
+function listaRegistros() {
+  for (var i = dataBase.length - 1; i >= 0; i--) {
+    table
+      .setHeading('Data', 'Duração', 'Categoria', 'Projeto', 'Ação')
+      .addRow(
+        dataBase[i].dataInicio.slice(8, 14), // Data inicio
+        (dataBase[i].duracao/3600).toFixed(2) + ' H', // Duração
+        dataBase[i].categoria, // Categoria
+        dataBase[i].projeto, // Projeot
+        dataBase[i].acao); // Ação
+  }
+  console.log(table.toString())
+}
+
+
 
 
 
@@ -144,7 +166,9 @@ program
   .description('Um teste de execução')
   .action(function() {
     console.log(agora);
+
   })
+
 
 program
   .command('start <nomeCategoria> <nomeProjeto> <nomeAcao>')
@@ -153,7 +177,9 @@ program
 
       new acao(nomeCategoria, nomeProjeto, nomeAcao)
       saveDataBase();
+      listaRegistros();
   })
+
 
 program
   .command('stop')
@@ -170,6 +196,6 @@ program
   .command('list')
   .description('Mostra todos os itens do database')
   .action(function() {
-    console.log(dataBase);
+    listaRegistros();
   })
 program.parse(process.argv);
