@@ -19,7 +19,7 @@ program.version('0.0.1');
 Database e suas funções
 */
 
-let dataBase = []
+let dataBase = [];
 
 function loadDataBase () {
   dataBase = store.get('dataBase')
@@ -137,8 +137,9 @@ function duracao(nomeInput) {
 function listaRegistros() {
   for (var i = dataBase.length - 1; i >= 0; i--) {
     table
-      .setHeading('Data', 'Duração', 'Categoria', 'Projeto', 'Ação')
+      .setHeading('Id', 'Data', 'Duração', 'Categoria', 'Projeto', 'Ação')
       .addRow(
+        i, // Id
         dataBase[i].dataInicio.slice(8, 14), // Data inicio
         (dataBase[i].duracao/3600).toFixed(2) + ' H', // Duração
         dataBase[i].categoria, // Categoria
@@ -148,6 +149,32 @@ function listaRegistros() {
   console.log(table.toString())
 }
 
+
+// Edita as propriedades de uma ação
+function editarPropriedade(id, nomePropriedade, novoValor) {
+
+  switch (nomePropriedade) {
+    case 'categoria':
+      dataBase[id].categoria = novoValor
+      break;
+    case 'projeto':
+      dataBase[id].projeto = novoValor
+      break;
+    case 'acao':
+      dataBase[id].acao = novoValor
+      break;
+    case 'inicio':
+      dataBase[id].dataInicio = novoValor
+      break;
+    case 'final':
+      dataBase[id].dataFim = novoValor
+      break;
+
+  }
+
+
+
+}
 
 
 
@@ -177,7 +204,6 @@ program
 
       new acao(nomeCategoria, nomeProjeto, nomeAcao)
       saveDataBase();
-      listaRegistros();
   })
 
 
@@ -193,9 +219,46 @@ program
   })
 
 program
-  .command('list')
+  .command('list [numRegistros]')
   .description('Mostra todos os itens do database')
-  .action(function() {
+  .action(function(numRegistros) {
+    console.log('\033[2J');
     listaRegistros();
+    teste();
+  })
+
+program
+  .command('edit <id> <nomePropriedade> <novoValor>')
+  .description('Edita os dados da ação')
+  .action(function(id, nomePropriedade, novoValor){
+
+    editarPropriedade(id, nomePropriedade, novoValor);
+    duracao();
+    saveDataBase();
+
   })
 program.parse(process.argv);
+
+
+
+
+/*
+ÁREA DE TESTES
+*/
+
+function teste(numRegistros) {
+  if (numRegistros === undefined) {
+    numRegistros = 10;
+  }
+  var chart = require('ascii-chart');
+
+  var data = dataBase.map((i) => (i.duracao/3600).toFixed(2)).slice(0, numRegistros);
+
+
+  console.log(chart(data, {
+    width: 50,
+    height: 20,
+    pointChar: '█',
+    negativePointChar: '░'
+  }));
+}
