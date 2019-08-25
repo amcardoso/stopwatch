@@ -1,17 +1,27 @@
 {
   "name": "stopwatch",
   "preferGlobal": true,
-  "bin": "./index.js",
+  "bin": "./dist/index.js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf output && rm -rf dist",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "commander": "^3.0.0",
+    "moment": "^2.24.0",
     "node-storage": "0.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^12.6.2",
+    "@types/shelljs": "^0.8.5",
+    "nodemon": "^1.19.1",
+    "typescript": "^3.5.3",
+    "ts-node": "^8.3.0"
   }
 }

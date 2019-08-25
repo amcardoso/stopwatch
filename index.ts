@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
-const Storage = require('node-storage');
-const commander = require('commander');
-const date = require('date-and-time');
+import Storage = require('node-storage');
+import Commander = require('commander');
+import moment = require('moment');
 
+moment.locale('pt-br');
 const store = new Storage('~/.stopwatch');
-const program = new commander.Command();
+const program = new Commander.Command();
 program.version('0.0.1');
-
+let comandoEncontrado = false;
 
 
 
@@ -42,7 +43,7 @@ Criando registros de tempo
 */
 
 const now = new Date();
-let agora = date.format(now, 'HH-mm-ss DD-MM-YYYY');
+let agora = moment(now).format('HH-mm-ss DD-MM-YYYY');
 
 
 
@@ -57,7 +58,7 @@ let agora = date.format(now, 'HH-mm-ss DD-MM-YYYY');
 Construtor de ação
 */
 
-function acao(nomeAcao, dataInicio, dataFim) {
+function acao(nomeAcao, dataInicio?, dataFim?) {
   this.nome = nomeAcao;
   this.dataInicio = agora;
   this.dataFim = '';
@@ -114,14 +115,11 @@ function definirFim() {
 function duracao(nomeInput) {
   for (var i = 0; i < dataBase.length; i++) {
     if (dataBase[i].nome === nomeInput) {
-      let fim = date.parse(dataBase[i].dataFim, 'HH-mm-ss DD-MM-YYYY')
-      let inicio = date.parse(dataBase[i].dataInicio, 'HH-mm-ss DD-MM-YYYY')
-      dataBase[i].duracao = date.subtract(fim, inicio).toSeconds();
-
+      dataBase[i].duracao = moment(dataBase[i].dataFim - dataBase[i].dataInicio).format('S');
     }
   }
 
-  return
+  return;
 }
 
 
@@ -140,6 +138,7 @@ program
   .command('agora')
   .description('Um teste de execução')
   .action(function() {
+    comandoEncontrado = true;
     console.log(agora);
   })
 
@@ -147,7 +146,7 @@ program
   .command('start <nomeAcao>')
   .description('Salva a data e hora de início')
   .action(function (nomeAcao) {
-
+    comandoEncontrado = true;
     if (verificarNome(nomeAcao)) {
       console.log('Essa ação já foi iniciada');
     } else {
@@ -162,7 +161,7 @@ program
   .command('stop <nomeAcao>')
   .description('Salva a data e hora de fim')
   .action(function (nomeAcao) {
-
+    comandoEncontrado = true;
     if (verificarNome(nomeAcao)) {
       definirFim();
       duracao(nomeAcao);
@@ -179,6 +178,12 @@ program
   .command('list')
   .description('Mostra todos os itens do database')
   .action(function() {
+    comandoEncontrado = true;
     console.log(dataBase);
   })
+
 program.parse(process.argv);
+
+if (!comandoEncontrado) {
+  console.error('Comando inválido!');
+}
