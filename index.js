@@ -158,10 +158,10 @@ program
 program
   .command('stop')
   .description('Salva a data e hora de fim')
-  .action(function (nomeAcao) {
+  .action(function () {
 
       definirFim();
-      duracao(nomeAcao);
+      duracao();
       saveDataBase();
 
   })
